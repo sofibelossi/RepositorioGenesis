@@ -12,11 +12,31 @@ class MedicamentoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-         $medicamentos=Medicamento::all();
-        return view('Medicamento.Medicamentos')->with('medicamentos',$medicamentos);
+  public function index(Request $request)
+{
+    // Leer parámetros GET (?sort=campo&direction=asc)
+    $sortField = $request->input('sort', 'id');
+    $sortDirection = $request->input('direction', 'asc');
+
+    // Validar que los campos sean válidos (previene SQL injection)
+    $allowedFields = ['id', 'nombre', 'precio', 'laboratorio', 'tipo'];
+    if (!in_array($sortField, $allowedFields)) {
+        $sortField = 'id';
     }
+
+    $sortDirection = $sortDirection === 'desc' ? 'desc' : 'asc';
+
+    // Traer los registros ordenados
+    $medicamentos = Medicamento::orderBy($sortField, $sortDirection)->get();
+
+    // Devolver vista con los datos
+    return view('Medicamento.Medicamentos', [
+        'medicamentos' => $medicamentos,
+        'sortField' => $sortField,
+        'sortDirection' => $sortDirection,
+        'buscar' => '',
+    ]);
+}
 
     /**
      * Show the form for creating a new resource.
@@ -25,7 +45,9 @@ class MedicamentoController extends Controller
      */
     public function create()
     {
-         return view('Medicamento.create');
+    $medicamento = new Medicamento();
+    return view('Medicamento.create', compact('medicamento'));
+    
     }
 
     /**
@@ -118,6 +140,35 @@ class MedicamentoController extends Controller
     {
        $medicamento = Medicamento::find($id);
        $medicamento->delete();//se usa eloquent
-       return redirect('/medicamentos');
+       return redirect('/medicamentos')->with('status', 'Medicamento eliminado con éxito');
     }
+     public function buscar(Request $request)
+{
+    
+    $query = $request->input('buscar');
+    $sortField = $request->input('sort', 'id'); 
+    $sortDirection = $request->input('direction', 'asc'); 
+
+ 
+    $medicamentos = Medicamento::query();
+
+    // filtra por marca laboratorio
+    if (!empty($query)) {
+        $medicamentos->where(function($q) use ($query) {
+            $q->where('tipo', 'LIKE', "%{$query}%")
+              ->orWhere('laboratorio', 'LIKE', "%{$query}%");
+        });
+    }
+
+    //ordenamiento
+    $medicamentos = $medicamentos->orderBy($sortField, $sortDirection)->get();
+
+    
+    return view('medicamento.medicamentos', [
+        'medicamentos' => $medicamentos,
+        'sortField' => $sortField,
+        'sortDirection' => $sortDirection,
+        'buscar' => $query,
+    ]);
+}
 }
