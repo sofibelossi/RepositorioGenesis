@@ -72,7 +72,7 @@ class MedicamentoController extends Controller
         $medicamentos->imagen = $nombre;
     }
         $medicamentos->save();//se usa eloquent
-        return redirect('/medicamentos');
+        return redirect('/medicamentos')->with('status', 'Medicamento agregado con éxito');
     }
 
     /**
@@ -127,7 +127,7 @@ class MedicamentoController extends Controller
         $medicamento->imagen = $nombre;
     }     
         $medicamento->save();//se usa eloquent
-        return redirect('/medicamentos');
+        return redirect('/medicamentos')->with('status', 'Medicamento modificado con éxito');
     }
 
     /**

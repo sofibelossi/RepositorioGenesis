@@ -25,10 +25,10 @@ class MedicamentoRequest extends FormRequest
     {
         return [
             'nombre'=>'required|string|max:100',
-            'precio'=>'required|numeric|max:100',
+            'precio'=>'required|numeric|max:10000',
             'laboratorio'=>'required|string|max:100',
             'tipo'=>'required|string|max:100',
-            'imagen' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'imagen' => 'nullable|image|mimes:jpg,jpeg,png|max:1000'
         ];
     }
     public function medicamentos(){
